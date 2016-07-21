@@ -1,0 +1,38 @@
+.dc-record {
+  padding: 10px;
+  opacity: 0.5;
+
+  & .dc-top-panel {
+    color: gray;
+  }
+
+  & .dc-info {
+    color: gray;
+  }
+
+  & .dc-progress-bar {
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+
+    & .duration-time {
+      width: 100px;
+      padding-left: 30px;
+    }
+  }
+
+  & .rc-slider-step {
+    background: #b3e6fb;
+  }
+
+  & .rc-slider-disabled {
+    & .rc-slider-step {
+      background: gray;
+    }
+  }
+
+  &.selected {
+    opacity: 1;
+    background: #dff4fd;
+  }
+}
