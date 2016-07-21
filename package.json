@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "rimraf lib && webpack --colors --config webpack.build.js",
+    "babuild": "babel src -d lib",
     "lint": "eslint src"
   },
   "repository": {

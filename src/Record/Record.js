@@ -2,8 +2,8 @@ import React, { Component, PropTypes } from 'react';
 import Dictaphone, { formatTime } from 'dictaphone-js';
 import Slider from 'rc-slider';
 import cx from 'classnames';
-import 'rc-slider/assets/index.css';
-import './Record.scss';
+// import 'rc-slider/assets/index.css';
+// import './Record.scss';
 
 export default class Record extends Component {
 

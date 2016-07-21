@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Record from './Record';
 import { values } from 'lodash';
-import './Dictaphone.scss'
+// import './Dictaphone.scss'
 
 export default class Dictaphone extends Component {
 

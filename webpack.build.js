@@ -12,7 +12,9 @@ module.exports = {
     path: __dirname + '/lib/',
     publicPath: '/assets/',
     ignore: ['React', 'react-dom'],
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
+    library: 'react-dictaphone',
+    umdNamedDefine: true
   },
 
   debug: false,
@@ -22,6 +24,13 @@ module.exports = {
     colors: true,
     reasons: false
   },
+
+  externals: {
+    // Use external version of React
+    "react": "React",
+    "react-dom": "react-dom"
+  },
+
   plugins: [
     new webpack.NoErrorsPlugin(),
     new webpack.DefinePlugin({
@@ -31,7 +40,7 @@ module.exports = {
   ],
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'babel', exclude: /node_modules/ },
+      { test: /\.js$/, loader: 'babel', exclude: [/node_modules/] },
       {
         test: /\.(css|scss)$/,
         loader: ExtractTextPlugin.extract('style-loader', 'css-loader', 'sass-loader')
