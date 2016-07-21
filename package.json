@@ -54,8 +54,10 @@
     "dictaphone-js": "~0.1.*",
     "lodash": "^4.13.1",
     "rc-slider": "^3.7.4",
-    "react": "^0.14.6",
-    "react-dom": "^0.14.6",
     "react-slider": "^0.6.1"
+  },
+  "peerDependencies": {
+    "react": ">=0.13.0 <0.15.0 || ^0.14.0-rc1",
+    "react-dom": ">=0.13.0 <0.15.0 || ^0.14.0-rc1"
   }
 }
