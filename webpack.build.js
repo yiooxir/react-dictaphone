@@ -8,10 +8,10 @@ module.exports = {
   ],
 
   output: {
-    path: path.join(__dirname, 'dist'),
     filename: 'index.js',
     path: __dirname + '/lib/',
     publicPath: '/assets/',
+    ignore: ['React', 'react-dom'],
     libraryTarget: 'umd'
   },
 
@@ -31,7 +31,7 @@ module.exports = {
   ],
   module: {
     loaders: [
-      { test: /\.js$/, loaders: ['babel'], exclude: /node_modules/ },
+      { test: /\.js$/, loader: 'babel', exclude: /node_modules/ },
       {
         test: /\.(css|scss)$/,
         loader: ExtractTextPlugin.extract('style-loader', 'css-loader', 'sass-loader')
