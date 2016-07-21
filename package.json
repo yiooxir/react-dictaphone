@@ -1,6 +1,6 @@
 {
   "name": "react-dictaphone",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "lib/index.js",
   "description": "The component allows you listen to, create and edit records using browser native media API interface",
   "scripts": {
@@ -49,7 +49,6 @@
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {
-
     "dictaphone-js": "~0.1.*",
     "lodash": "^4.13.1",
     "rc-slider": "^3.7.4"
