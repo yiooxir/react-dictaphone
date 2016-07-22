@@ -6,6 +6,9 @@ module.exports = {
   entry: [
     'webpack-dev-server/client?http://localhost:3000',
     'webpack/hot/only-dev-server',
+    './src/css/dictaphone.scss',
+    './src/css/record.scss',
+    './src/css/rc-slider.css',
     './src/App.js'
   ],
   output: {

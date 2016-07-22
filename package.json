@@ -5,7 +5,9 @@
   "description": "The component allows you listen to, create and edit records using browser native media API interface",
   "scripts": {
     "start": "node server.js",
-    "build": "rimraf lib && webpack --colors --config webpack.build.js",
+    "build": "rimraf lib && npm run buildjs && npm run buildcss",
+    "buildjs": "babel src -d lib --ignore App.js",
+    "buildcss": "gulp css",
     "babuild": "babel src -d lib",
     "lint": "eslint src"
   },
@@ -42,6 +44,10 @@
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.6.2",
     "extract-text-webpack-plugin": "^1.0.1",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-sass": "^2.3.2",
+    "merge-stream": "^1.0.0",
     "node-sass": "^3.8.0",
     "react-hot-loader": "^1.3.0",
     "rimraf": "^2.5.3",
