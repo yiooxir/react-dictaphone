@@ -51,7 +51,7 @@
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {
-    "dictaphone-js": "~0.1.*",
+    "dictaphone-js": "^0.1.8",
     "lodash": "^4.13.1",
     "rc-slider": "^3.7.4"
   },

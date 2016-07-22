@@ -2,21 +2,30 @@ import React, { Component, PropTypes } from 'react';
 import Dictaphone, { formatTime } from 'dictaphone-js';
 import Slider from 'rc-slider';
 import cx from 'classnames';
-// import 'rc-slider/assets/index.css';
-// import './Record.scss';
+import 'rc-slider/assets/index.css';
+import './Record.scss';
 
 export default class Record extends Component {
 
   static propTypes = {
+    onSelect: PropTypes.func.isRequired,
+    id: PropTypes.number.isRequired,
     className: PropTypes.string,
     selected: PropTypes.bool,
-    id: PropTypes.number.isRequired,
-    extra: PropTypes.object.isRequired,
-    onInit: PropTypes.func.isRequired,
-    onSelect: PropTypes.func.isRequired,
+    value: PropTypes.any,
+
+    /* Custom renders */
     topRender: PropTypes.func,
     infoRender: PropTypes.func,
-    durationRender: PropTypes.func
+    durationRender: PropTypes.func,
+
+    /* API callbacks */
+    onStartRec: PropTypes.func,
+    onStopRec: PropTypes.func,
+    onPlay: PropTypes.func,
+    onPause: PropTypes.func,
+    onRewind: PropTypes.func,
+    onError: PropTypes.func
   };
 
   static defaultProps = {
@@ -33,68 +42,76 @@ export default class Record extends Component {
   }
 
   componentWillMount() {
-    const { id, extra } = this.props;
-    this.dictaphone = {_$id: this.props.id, _$init: false, _$extra: extra.userValues }
+    const { id, value } = this.props;
+    this.dictaphone = {_$id: this.props.id, _$init: false, _$extra: value }
   }
 
   componentDidMount() {
     const player = this.refs.player;
-    this.dictaphone = new Dictaphone(player);
-    this.dictaphone._$id = this.props.id;
-    this.dictaphone._$extra = this.props.extra.userValues;
-    this.props.onInit(this.dictaphone);
+    this.dictaphone = Object.assign(new Dictaphone(player), this.dictaphone);
+    this.dictaphone._$init = true;
     this.setState({loading: false});
 
-    this.dictaphone.on('startRecording', data => this.onStartRecording(data))
-    this.dictaphone.on('stopRecording', data => this.onStopRecording(data));
-    this.dictaphone.on('progress', data => this.onProgress(data));
-    this.dictaphone.on('pause', data => this.onPause(data));
-    this.dictaphone.on('play', data => this.onPlay(data));
+    this.dictaphone.on('stopRecording', data => this._onStopRecording(data));
+    this.dictaphone.on('progress', data => this._onProgress(data));
+    this.dictaphone.on('pause', data => this._onStopPlaying());
   }
 
   componentWillUnmount() {
     this.dictaphone.destroy();
   }
 
-  onStartRecording(data) {
-    this.setState({recording: true, playing: false})
+  _getCallbackInfo() {
+    return {
+      value: this.props.value,
+      _$id: this.props.id,
+    }
   }
 
-  onStopRecording(data) {
+  _onSliderMove(position) {
+    this.dictaphone.rewind(position);
+    this.setState({ position })
+    this.props.onSliderMove && this.props.onSliderMove(Object.assign({}, {position}, this._getCallbackInfo()));
+  }
+
+  _onProgress(data) {
+      this.setState({ position: data.time })
+  }
+
+  _onStopRecording(data) {
     this.setState({
       duration: data.duration,
       recording: false
     })
+
+    this._answer('onStopRec', {duration: data.duration});
   }
 
-  onProgress(data) {
-    this.setState({
-      position: data.time
-    })
-  }
-
-  onPause(data) {
+  _onStopPlaying() {
+    this._answer('onPause');
     this.setState({playing: false})
   }
 
-  onPlay() {
-    this.setState({playing: true})
+  _isReady() {
+    return this.isLoaded();
   }
 
-  onSliderMove(position) {
-    this.dictaphone.rewind(position);
-    this.setState({ position })
+  _answer(cbName, extra={}) {
+    const cb = this.props[cbName] || function(){};
+    cb({...this._getCallbackInfo(), ...extra});
   }
+
+  /** CUSTOM RENDERS */
 
   topRender() {
     const { topRender } = this.props;
-    return topRender ? topRender(this.dictaphone._$extra) :
+    return topRender ? topRender(this._getCallbackInfo()) :
       (<div className="dc-top-panel">Record {this.dictaphone._$id} ...</div>)
   }
 
   infoRender() {
     const { infoRender } = this.props;
-    return infoRender ? infoRender(this.dictaphone._$extra) :
+    return infoRender ? infoRender(this._getCallbackInfo()) :
       (<div className="dc-info"></div>)
   }
 
@@ -102,14 +119,78 @@ export default class Record extends Component {
     const { durationRender } = this.props;
     const { duration } = this.state;
 
-    return durationRender ? durationRender(this.dictaphone._$extra, duration) :
+    return durationRender ? durationRender(Object.assign({}, this._getCallbackInfo(), {duration})) :
       (<div className="duration-time">{formatTime(duration)}</div>)
   }
+
+  /** PUBLIC API */
+
+  getRecorder() {
+    return this.dictaphone;
+  }
+
+  getDurationTime() {
+    return this.state.duration;
+  }
+
+  isLoaded() {
+    return !this.state.loading
+  }
+
+  play() {
+    const { loading, recording, playing, onPlay } = this.state;
+    if ( !this._isReady() || recording || playing ) return;
+
+    this.dictaphone.play();
+    this._answer('onPlay');
+    this.setState({playing: true})
+  }
+
+  pause() {
+    const { loading, recording, playing, onPlay } = this.state;
+    if ( !this._isReady() || recording || !playing ) return;
+    this.dictaphone.pause();
+  }
+
+  startRec() {
+    const { loading, recording, playing, onPlay } = this.state;
+    if ( !this._isReady() || recording || playing ) return;
+
+    this.dictaphone.startRecording();
+    this._answer('onStartRec');
+    this.setState({recording: true})
+  }
+
+  /* User's callback call is provided by #_onStopRecording
+  *  because we need to wait of creating a blob file */
+  stopRec() {
+    const { loading, recording, playing, onPlay } = this.state;
+    if ( !this._isReady() || !recording || playing ) return;
+
+    console.log('stop Rec')
+    this.dictaphone.stopRecording();
+    this.setState({recording: false})
+  }
+
+  rewind(time) {
+    const { loading, recording, onPlay } = this.state;
+    if ( !this._isReady() || recording ) return;
+
+    this.dictaphone.rewind(time);
+    this._answer('onRewind', {time});
+    this.setState({position: time});
+  }
+
+  remove() {
+    this.dictaphone.destroy();
+  }
+
+
+  /** ------ RENDER ------- */
 
   render() {
     const { className, onInit, onSelect, selected, ...rest } = this.props;
     const { position, duration, playing, recording } = this.state;
-    // const recordBoxStyle = {visibility: `${!selected ? 'hidden' : 'visible'}`}
     const recordClassName = cx('dc-record', className, {
       playing: playing,
       recording: recording,
@@ -119,7 +200,7 @@ export default class Record extends Component {
     })
 
     return (
-      <div className={recordClassName} {...rest} onClick={() => onSelect(this.dictaphone)} >
+      <div className={recordClassName} onClick={() => onSelect(this.dictaphone._$id)} >
 
         {/* todo add custom render */}
         { this.topRender() }
@@ -130,6 +211,7 @@ export default class Record extends Component {
           { this.infoRender() }
 
           <audio ref='player' />
+
           <div className="dc-progress-bar">
             <Slider
               min={0}
@@ -137,7 +219,7 @@ export default class Record extends Component {
               step={duration ? 1/(duration * 100) : 0.01}
               value={position}
               defaultValue={0}
-              onChange={pos => this.onSliderMove(pos)}
+              onChange={pos => this.rewind(pos)}
               disabled={!(this.dictaphone && this.dictaphone._$init && duration)}
             />
 
@@ -149,3 +231,4 @@ export default class Record extends Component {
     );
   }
 }
+

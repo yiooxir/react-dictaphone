@@ -1,16 +1,23 @@
 import React, { Component, PropTypes } from 'react';
 import Record from './Record';
-import { values } from 'lodash';
-// import './Dictaphone.scss'
+import { values, pick, reject } from 'lodash';
+import './Dictaphone.scss'
 
 export default class Dictaphone extends Component {
 
   static propTypes = {
     className: PropTypes.string,
-    onRecordSelect: PropTypes.func,
     topRender: PropTypes.func,
     infoRender: PropTypes.func,
-    durationRender: PropTypes.func
+    durationRender: PropTypes.func,
+    
+    onSelect: PropTypes.func,
+    onStartRec: PropTypes.func,
+    onStopRec: PropTypes.func,
+    onPlay: PropTypes.func,
+    onPause: PropTypes.func,
+    onRewind: PropTypes.func,
+    onError: PropTypes.func
   };
 
   static defaultProps = {
@@ -18,117 +25,108 @@ export default class Dictaphone extends Component {
   };
 
   state = {
-    dictaphonesIds: [],
-    currentRecordId: null,
+    RecIds: [],
+    currentRecId: null,
   }
 
   componentWillMount() {
-    this.dictaphones = {};
-    this.dict = null;
+    this._rec = null;
+    this._recParams = [];
     this.nextId = 1;
   }
 
-  _addDict(userParams) {
+  /** PRIVATE METHODS */
+
+  _addRec(userParams) {
     const id = this.nextId++;
-    const dict = {_$id: id, _$init: false, _$extra: userParams};
-    this.dictaphones[id] = dict;
-    this.setState({
-      dictaphonesIds: [...this.state.dictaphonesIds, id],
-      currentRecordId: id
-    })
+    this._recParams.push({_$id: id, value: userParams});
+    this.setState({ currentRecId: id })
+    setTimeout(() => {this._setRec(id)}, 0)
   }
 
-  _initDict(dict) {
-    dict._$init = true;
-    this.dictaphones[dict._$id] = dict;
-    this._setDict(dict._$id);
+  _setRec(recId) {
+    this._rec = this._getRecRef(recId);
+    this.setState({ currentRecId: recId })
   }
 
-  _setDict(dictId) {
-    this.dict = this._getDict(dictId);
+  _getRecRef(recId) {
+    return this.refs[`ref_${recId}`];
   }
 
-  _getDict(dictId) {
-    return this.dictaphones[dictId];
+  _delRec(recId) {
+    reject(this._recParams, {_$id: recId});
+    this._rec.remove();
+    this._rec = null;
   }
 
-  _onRecordSelectHandler(dict) {
-    this._setDict(dict._$id);
-    this.setState({
-      currentRecordId: dict._$id
-    })
+  _onRecSelect(recId) {
+    this._setRec(recId);
   }
 
-  _isDict() {
-    if (!this.dict) {
-      console.warn('Record not selected');
-    }
-
-    return !!this.dict;
+  _isRecReady() {
+    return this._rec && this._rec.loaded();
   }
 
-  startRec() {
-    this._isDict() && this.dict.startRecording();
+  /** PUBLIC API */
 
+  getRecorder = () => {
+    this._rec && this._rec.getRecorder();
   }
 
-  stopRec() {
-    this._isDict() && this.dict.stopRecording();
+  getDurationTime = () => {
+    this._rec && this._rec.getDurationTime();
   }
 
-  play() {
-    this._isDict() && this.dict.play()
+  isLoaded = () => {
+    this._rec && this._rec.isLoaded();
   }
 
-  pause() {
-    this._isDict() && this.dict.pause();
+  play = () => {
+    this._rec && this._rec.play();
   }
 
-  togglePlayback() {
-    this._isDict() && this.dict.togglePlayback();
+  pause = () => {
+    this._rec && this._rec.pause();
   }
 
-  rewind(time) {
-    this._isDict() && this.dict.rewind(time);
+  startRec = () => {
+    this._rec && this._rec.startRec();
   }
 
-  rewindStart() {
-    this._isDict() && this.dict.rewindStart();
+  stopRec = () => {
+    this._rec && this._rec.stopRec();
   }
 
-  rewindEnd() {
-    this._isDict() && this.dict.rewindEnd();
+  rewind = (time) => {
+    this._rec && this._rec.rewind(time);
   }
 
-  save() {
-    console.warn('Operation TBD');
+  createRec(params) {
+    this._addRec(params);
   }
 
   deleteRec() {
-    console.warn('Operation TBD');
-  }
-
-  createRec(userParams) {
-    this._addDict(userParams);
+    this._rec && this._delRec();
   }
 
   render() {
-    const { className, topRender, infoRender, durationRender, ...rest } = this.props;
-    const { currentRecordId } = this.state;
+    const { className, onSelect } = this.props;
+    const { currentRecId } = this.state;
+    const actions = pick(this.props, 'onStartRec', 'onStopRec', 'onPlay', 'onPause', 'onRewind', 'onError');
+    const renders = pick(this.props, 'topRender', 'infoRender', 'durationRender');
 
     return (
-      <div className={`dictaphone-js ${className}`} {...rest} >
-        {values(this.dictaphones).map((dict, i) => (
+      <div className={`dictaphone-js ${className}`} >
+        {values(this._recParams).map((rec, i) => (
           <Record
-            selected={dict._$id === currentRecordId}
-            extra={{userValues: dict._$extra}}
+            ref={`ref_${rec._$id}`}
             key={i}
-            id={dict._$id}
-            onInit={dic => this._initDict(dic)}
-            onSelect={dict => this._onRecordSelectHandler(dict)}
-            topRender={topRender}
-            infoRender={infoRender}
-            durationRender={durationRender}
+            selected={rec._$id === currentRecId}
+            value={rec.value}
+            id={rec._$id}
+            onSelect={recId => this._onRecSelect(recId)}
+            {...actions}
+            {...renders}
           />
         ))}
       </div>
