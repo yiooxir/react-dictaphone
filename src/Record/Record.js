@@ -167,7 +167,6 @@ export default class Record extends Component {
     const { loading, recording, playing, onPlay } = this.state;
     if ( !this._isReady() || !recording || playing ) return;
 
-    console.log('stop Rec')
     this.dictaphone.stopRecording();
     this.setState({recording: false})
   }

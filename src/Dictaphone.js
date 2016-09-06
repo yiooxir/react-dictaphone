@@ -24,8 +24,8 @@ export default class Dictaphone extends Component {
   };
 
   state = {
-    RecIds: [],
     currentRecId: null,
+    affectedRecords: []
   }
 
   componentWillMount() {
@@ -38,14 +38,18 @@ export default class Dictaphone extends Component {
 
   _addRec(userParams) {
     const id = this.nextId++;
-    this._recParams.push({_$id: id, value: userParams});
+    const prep = {_$id: id, value: userParams}
+    this._recParams.push(prep);
     this.setState({ currentRecId: id })
-    setTimeout(() => {this._setRec(id)}, 0)
+    setTimeout(() => {
+      prep._rec = this._setRec(id);
+    }, 0)
   }
 
   _setRec(recId) {
     this._rec = this._getRecRef(recId);
-    this.setState({ currentRecId: recId })
+    this.setState({ currentRecId: recId });
+    return this._rec;
   }
 
   _getRecRef(recId) {
@@ -90,6 +94,10 @@ export default class Dictaphone extends Component {
 
   startRec = () => {
     this._rec && this._rec.startRec();
+
+    const affectedRecords = this.state.affectedRecords;
+    const id = this._rec.dictaphone._$id;
+    !affectedRecords.includes(id) && this.setState({affectedRecords: [...affectedRecords, id]})
   }
 
   stopRec = () => {
@@ -100,12 +108,28 @@ export default class Dictaphone extends Component {
     this._rec && this._rec.rewind(time);
   }
 
+  rewindToBegin = () => {
+    this._rec && this._rec.rewindToBegin();
+  }
+
+  rewindToEnd = () => {
+    this._rec && this._rec.rewindToEnd();
+  }
+
   createRec(params) {
     this._addRec(params);
   }
 
   deleteRec() {
     this._rec && this._delRec();
+  }
+
+  getData() {
+    return values(this._recParams.map(e => ({
+      values: e.value,
+      blob: e._rec.dictaphone.master_recording,
+      affected: this.state.affectedRecords.includes(e._rec.dictaphone._$id)
+    })))
   }
 
   render() {

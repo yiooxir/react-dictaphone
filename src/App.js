@@ -48,6 +48,7 @@ export default class App extends Component {
         <button onClick={() => this.handleStopRec()}>stop >></button>
         <button onClick={() => this.handlePlay()}>play >></button>
         <button onClick={() => this.handlePause()}>pause >></button>
+        <button onClick={() => console.log(this.refs.dict.getData())}>print list</button>
 
         <Dictaphone
           ref="dict"
