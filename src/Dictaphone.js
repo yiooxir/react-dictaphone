@@ -41,9 +41,11 @@ export default class Dictaphone extends Component {
     const prep = {_$id: id, value: userParams}
     this._recParams.push(prep);
     this.setState({ currentRecId: id })
-    setTimeout(() => {
+
+    return new Promise(resolve => setTimeout(() => {
       prep._rec = this._setRec(id);
-    }, 0)
+      resolve();
+    }, 0))
   }
 
   _setRec(recId) {
@@ -116,8 +118,11 @@ export default class Dictaphone extends Component {
     this._rec && this._rec.rewindToEnd();
   }
 
-  createRec(params) {
-    this._addRec(params);
+  createRec(params, blob = null) {
+    return Promise.resolve()
+      .then(rec => this._addRec(params))
+      .then(() => blob && this._rec.setRecord(blob))
+      .then(() => this._rec);
   }
 
   deleteRec() {

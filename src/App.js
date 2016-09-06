@@ -13,7 +13,7 @@ const infoRender = function(value) {
 }
 
 const durationRender = function(value, duration) {
-  console.log('durationRender', value, duration)
+  // console.log('durationRender', value, duration)
   return (<div> MY DURATION RENDER </div>)
 }
 
@@ -27,7 +27,7 @@ export default class App extends Component {
   }
 
   handleCreateRec() {
-    this.refs.dict.createRec({id: 1, user: 'man'});
+    this.refs.dict.createRec({id: 1, user: 'man'}, this.blob);
   }
 
   handlePlay() {
@@ -38,7 +38,9 @@ export default class App extends Component {
     this.refs.dict.pause();
   }
 
-
+  _$keepBlob() {
+    this.blob = this.refs.dict._rec.dictaphone.master_recording;
+  }
 
   render() {
     return (
@@ -48,6 +50,7 @@ export default class App extends Component {
         <button onClick={() => this.handleStopRec()}>stop >></button>
         <button onClick={() => this.handlePlay()}>play >></button>
         <button onClick={() => this.handlePause()}>pause >></button>
+        <button onClick={() => this._$keepBlob()}>keepBlob</button>
         <button onClick={() => console.log(this.refs.dict.getData())}>print list</button>
 
         <Dictaphone

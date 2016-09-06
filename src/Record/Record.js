@@ -47,8 +47,8 @@ export default class Record extends Component {
   }
 
   componentDidMount() {
-    const player = this.refs.player;
-    this.dictaphone = Object.assign(new Dictaphone(player), this.dictaphone);
+    this.player = this.refs.player;
+    this.dictaphone = Object.assign(new Dictaphone(this.player), this.dictaphone);
     this.dictaphone._$init = true;
     this.setState({loading: false});
 
@@ -124,6 +124,29 @@ export default class Record extends Component {
   }
 
   /** PUBLIC API */
+
+  setRecord(blob) {
+    if (!blob) return;
+
+    return new Promise((resolve, reject) => {
+      const getDuration = (e) => {
+        this.player.removeEventListener('durationchange', getDuration, true);
+
+        this.setState({
+          duration: this.dictaphone.player.duration
+        })
+
+        resolve();
+      }
+
+      this.player.addEventListener('durationchange', getDuration, true);
+      this.dictaphone.player.src = window.URL.createObjectURL(blob);
+    })
+
+
+
+
+  }
 
   getRecorder() {
     return this.dictaphone;
