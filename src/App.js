@@ -51,13 +51,15 @@ export default class App extends Component {
         <button onClick={() => this.handlePlay()}>play >></button>
         <button onClick={() => this.handlePause()}>pause >></button>
         <button onClick={() => this._$keepBlob()}>keepBlob</button>
-        <button onClick={() => console.log(this.refs.dict.getData())}>print list</button>
+        <button onClick={() => console.log(this.refs.dict.getAllRecordData())}>print list</button>
+        <button onClick={() => console.log(this.refs.dict.getCurrentRecordData())}>print current rec</button>
+        <button onClick={() => console.log(this.refs.dict.allowSelectRecords(false))}>protect select records</button>
 
         <Dictaphone
           ref="dict"
           topRender={topRender}
           infoRender={infoRender}
-          onSelect={(data) => console.log('onSelect', data)}
+          onSelect={(...args) => console.log('onSelect', ...args)}
           onStartRec={(data) => console.log('onStartRec', data)}
           onStopRec={(data) => console.log('onStopRec', data)}
           onPlay={(data) => console.log('onPlay', data)}

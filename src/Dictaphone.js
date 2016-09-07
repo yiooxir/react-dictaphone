@@ -32,6 +32,7 @@ export default class Dictaphone extends Component {
     this._rec = null;
     this._recParams = [];
     this.nextId = 1;
+    this.selectDisabled = false;
   }
 
   /** PRIVATE METHODS */
@@ -65,14 +66,22 @@ export default class Dictaphone extends Component {
   }
 
   _onRecSelect(recId) {
-    this._setRec(recId);
+    !this._isSelectDisabled() && this._setRec(recId);
+    this.props.onSelect && this.props.onSelect(this._rec, !this._isSelectDisabled());
   }
 
   _isRecReady() {
     return this._rec && this._rec.loaded();
   }
 
+  _isSelectDisabled() {
+    return this.selectDisabled;
+  }
   /** PUBLIC API */
+
+  selectRec = (recId) => {
+    this._setRec(recId);
+  }
 
   getRecorder = () => {
     this._rec && this._rec.getRecorder();
@@ -129,12 +138,25 @@ export default class Dictaphone extends Component {
     this._rec && this._delRec();
   }
 
-  getData() {
+  getAllRecordData() {
     return values(this._recParams.map(e => ({
       values: e.value,
       blob: e._rec.dictaphone.master_recording,
       affected: this.state.affectedRecords.includes(e._rec.dictaphone._$id)
     })))
+  }
+
+  getCurrentRecordData() {
+    console.log(this._rec);
+    return {
+      values: this._rec.dictaphone._$extra,
+      blob: this._rec.dictaphone.master_recording,
+      affected: this.state.affectedRecords.includes(this._rec.dictaphone._$id)
+    }
+  }
+
+  allowSelectRecords(sign = true) {
+    this.selectDisabled = !sign;
   }
 
   render() {
