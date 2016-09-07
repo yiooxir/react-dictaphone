@@ -49,8 +49,8 @@ export default class Dictaphone extends Component {
     }, 0))
   }
 
-  _setRec(recId) {
-    this._rec = this._getRecRef(recId);
+  _setRec(recId = null) {
+    this._rec = recId ? this._getRecRef(recId) : null;
     this.setState({ currentRecId: recId });
     return this._rec;
   }
@@ -60,9 +60,9 @@ export default class Dictaphone extends Component {
   }
 
   _delRec(recId) {
-    reject(this._recParams, {_$id: recId});
-    this._rec.remove();
-    this._rec = null;
+
+    this._recParams = reject(this._recParams, {_$id: recId});
+    this._rec = this._recParams.length ? this._setRec(this._recParams[0]._$id) : null;
   }
 
   _onRecSelect(recId) {
@@ -135,7 +135,7 @@ export default class Dictaphone extends Component {
   }
 
   deleteRec() {
-    this._rec && this._delRec();
+    this._rec && this._delRec(this._rec.dictaphone._$id);
   }
 
   getAllRecordData() {
@@ -147,7 +147,6 @@ export default class Dictaphone extends Component {
   }
 
   getCurrentRecordData() {
-    console.log(this._rec);
     return {
       values: this._rec.dictaphone._$extra,
       blob: this._rec.dictaphone.master_recording,
@@ -170,7 +169,7 @@ export default class Dictaphone extends Component {
         {values(this._recParams).map((rec, i) => (
           <Record
             ref={`ref_${rec._$id}`}
-            key={i}
+            key={rec._$id}
             selected={rec._$id === currentRecId}
             value={rec.value}
             id={rec._$id}

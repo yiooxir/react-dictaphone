@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Dictaphone from './Dictaphone';
+import blobUtil from 'blob-util';
 
 const topRender = function(value) {
-  // console.log('topRender', value)
-  return (<div className="dc-top-panel"> My Record </div>)
+  return (<div className="dc-top-panel"> My Record {value.value.hash} </div>)
 }
 
 const infoRender = function(value) {
-  // console.log('infoRender', value)
   return (<div className="dc-info"> Record info: ... </div>)
 }
 
 const durationRender = function(value, duration) {
-  // console.log('durationRender', value, duration)
   return (<div> MY DURATION RENDER </div>)
 }
 
@@ -27,7 +25,7 @@ export default class App extends Component {
   }
 
   handleCreateRec() {
-    this.refs.dict.createRec({id: 1, user: 'man'}, this.blob);
+    this.refs.dict.createRec({id: 1, user: 'man', hash: Math.floor(Math.random(3)*1000)}, this.blob);
   }
 
   handlePlay() {
@@ -39,7 +37,17 @@ export default class App extends Component {
   }
 
   _$keepBlob() {
-    this.blob = this.refs.dict._rec.dictaphone.master_recording;
+    this.blob2 = this.refs.dict._rec.dictaphone.master_recording;
+
+    blobUtil.blobToBase64String(this.blob2).then((base64String) => {
+      return blobUtil.base64StringToBlob(base64String)
+    })
+      .then(res => {
+        this.blob = res;
+      })
+      .catch(function (err) {
+      console.error(err);
+    });
   }
 
   render() {
@@ -54,17 +62,24 @@ export default class App extends Component {
         <button onClick={() => console.log(this.refs.dict.getAllRecordData())}>print list</button>
         <button onClick={() => console.log(this.refs.dict.getCurrentRecordData())}>print current rec</button>
         <button onClick={() => console.log(this.refs.dict.allowSelectRecords(false))}>protect select records</button>
+        <button onClick={() => console.log(this.refs.dict.deleteRec())}>delete rec</button>
 
+        {/*<Dictaphone*/}
+          {/*ref="dict"*/}
+          {/*topRender={topRender}*/}
+          {/*infoRender={infoRender}*/}
+          {/*onSelect={(...args) => console.log('onSelect', ...args)}*/}
+          {/*onStartRec={(data) => console.log('onStartRec', data)}*/}
+          {/*onStopRec={(data) => console.log('onStopRec', data)}*/}
+          {/*onPlay={(data) => console.log('onPlay', data)}*/}
+          {/*onPause={(data) => console.log('onPause', data)}*/}
+          {/*onRewind={(data) => console.log('onRewind', data)}*/}
+          {/*onError={(data) => console.log('onError', data)}*/}
+        {/*/> */}
         <Dictaphone
           ref="dict"
           topRender={topRender}
           infoRender={infoRender}
-          onSelect={(...args) => console.log('onSelect', ...args)}
-          onStartRec={(data) => console.log('onStartRec', data)}
-          onStopRec={(data) => console.log('onStopRec', data)}
-          onPlay={(data) => console.log('onPlay', data)}
-          onPause={(data) => console.log('onPause', data)}
-          onRewind={(data) => console.log('onRewind', data)}
           onError={(data) => console.log('onError', data)}
         />
       </div>
