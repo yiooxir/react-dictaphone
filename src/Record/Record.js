@@ -203,6 +203,14 @@ export default class Record extends Component {
     this.setState({position: time});
   }
 
+  rewindToBegin() {
+    this.rewind(0);
+  }
+
+  rewindToEnd() {
+    this.rewind(this.getDurationTime())
+  }
+
   remove() {
     this.dictaphone.destroy();
   }

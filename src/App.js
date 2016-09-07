@@ -63,6 +63,8 @@ export default class App extends Component {
         <button onClick={() => console.log(this.refs.dict.getCurrentRecordData())}>print current rec</button>
         <button onClick={() => console.log(this.refs.dict.allowSelectRecords(false))}>protect select records</button>
         <button onClick={() => console.log(this.refs.dict.deleteRec())}>delete rec</button>
+        <button onClick={() => console.log(this.refs.dict.rewindToBegin())}>backWard</button>
+        <button onClick={() => console.log(this.refs.dict.rewindToEnd())}>Forward</button>
 
         {/*<Dictaphone*/}
           {/*ref="dict"*/}
