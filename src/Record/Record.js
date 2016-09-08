@@ -141,11 +141,8 @@ export default class Record extends Component {
 
       this.player.addEventListener('durationchange', getDuration, true);
       this.dictaphone.player.src = window.URL.createObjectURL(blob);
+      this.dictaphone.master_recording = blob;
     })
-
-
-
-
   }
 
   getRecorder() {
